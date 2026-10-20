@@ -1,0 +1,10 @@
+{
+  "description": "Calculate the return on investment for Bioflex E85 kits across multiple vehicles, tracking fuel costs and savings with visual dashboards and graphs.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
