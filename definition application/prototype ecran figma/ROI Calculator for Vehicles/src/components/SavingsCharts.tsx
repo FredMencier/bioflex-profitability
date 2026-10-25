@@ -20,6 +20,10 @@ function money(value: number): string {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
 }
 
+function pricePerLitre(value: number): string {
+  return `${new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(value)} €/L`;
+}
+
 function dateLabel(value: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" })
     .format(new Date(value));
@@ -72,7 +76,22 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
     color: [green, orange],
     grid: { left: 58, right: 16, top: 12, bottom: 42 },
     legend: { top: 0, right: 8, textStyle: { color: "#7f8985" } },
-    tooltip: { trigger: "axis", valueFormatter: (value) => money(Number(value)) },
+    tooltip: {
+      trigger: "axis",
+      triggerOn: "click",
+      formatter: (params) => {
+        const point = Array.isArray(params) ? params[0] : params;
+        const fill = recent[point?.dataIndex];
+        if (!fill) return "";
+
+        const costs = calculateFillCosts(fill);
+        return [
+          `<strong>${dateLabel(fill.recordedAt)}</strong>`,
+          `<div><span style="color:${green}">●</span> E85 payé : ${money(costs.e85CostEur)} · ${pricePerLitre(fill.e85PricePerLitreEur)}</div>`,
+          `<div><span style="color:${orange}">●</span> SP95 équivalent : ${money(costs.sp95EquivalentCostEur)} · ${pricePerLitre(fill.sp95PricePerLitreEur)}</div>`,
+        ].join("");
+      },
+    },
     xAxis: {
       type: "category",
       data: recent.map((fill) => dateLabel(fill.recordedAt)),
@@ -140,7 +159,7 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
       </section>
       <section className="chart-grid lower">
         <article className="panel comparison">
-          <div className="panel-head"><div><h3>Coût des pleins</h3><p>E85 et équivalent SP95 ajusté de 20 %</p></div></div>
+          <div className="panel-head"><div><h3>Coût des pleins</h3><p>Cliquez sur une barre pour voir les prix au litre · SP95 ajusté de 20 %</p></div></div>
           {fills.length ? <Chart option={comparisonOption} label="Comparaison du coût E85 et du coût SP95 équivalent" className="echart echart-bars" /> : <div className="empty-chart">Aucune donnée à comparer.</div>}
         </article>
       </section>

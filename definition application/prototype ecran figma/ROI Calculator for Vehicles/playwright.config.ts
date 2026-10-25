@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:3000/bioflex-profitability/",
+    baseURL: "http://127.0.0.1:3100/bioflex-profitability/",
     trace: "retain-on-failure",
   },
   projects: [
@@ -15,8 +15,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev --hostname 127.0.0.1",
-    url: "http://127.0.0.1:3000/bioflex-profitability/",
+    command: "pnpm dev --hostname 127.0.0.1 --port 3100",
+    url: "http://127.0.0.1:3100/bioflex-profitability/",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

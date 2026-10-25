@@ -5,7 +5,7 @@ function money(value: number): string {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
 }
 
-export function FillHistory({ fills }: { fills: Fill[] }) {
+export function FillHistory({ fills, onEditFill }: { fills: Fill[]; onEditFill: (fill: Fill) => void }) {
   const recentFills = [...fills].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
 
   return (
@@ -14,10 +14,17 @@ export function FillHistory({ fills }: { fills: Fill[] }) {
       <div className="fill-list">
         {recentFills.map((fill) => {
           const costs = calculateFillCosts(fill);
-          const date = new Date(fill.recordedAt);
+          const [year, month, day] = fill.recordedAt.slice(0, 10).split("-").map(Number);
+          const date = new Date(Date.UTC(year, month - 1, day));
           return (
-            <div className="fill-row" key={fill.id}>
-              <div className="date-box"><strong>{date.getDate()}</strong><small>{new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(date).replace(".", "")}</small></div>
+            <button
+              className="fill-row fill-row-button"
+              key={fill.id}
+              type="button"
+              aria-label={`Modifier le plein enregistré le ${fill.recordedAt.slice(0, 10)}`}
+              onClick={() => onEditFill(fill)}
+            >
+              <div className="date-box"><strong>{date.getUTCDate()}</strong><small>{new Intl.DateTimeFormat("fr-FR", { month: "short", timeZone: "UTC" }).format(date).replace(".", "")}</small></div>
               <div className="fill-info">
                 <strong>{fill.litres.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} L d'E85</strong>
                 <small>E85 payé {money(costs.e85CostEur)} · SP95 équivalent {money(costs.sp95EquivalentCostEur)}</small>
@@ -25,7 +32,7 @@ export function FillHistory({ fills }: { fills: Fill[] }) {
               <div className={`saving ${costs.savingEur < 0 ? "negative" : ""}`}>
                 <small>ÉCONOMIE</small><strong>{money(costs.savingEur)}</strong>
               </div>
-            </div>
+            </button>
           );
         })}
         {!recentFills.length && <div className="empty-list">Aucun plein enregistré pour ce véhicule.</div>}

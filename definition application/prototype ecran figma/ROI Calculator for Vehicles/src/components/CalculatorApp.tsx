@@ -16,7 +16,7 @@ import { SavingsCharts } from "@/components/SavingsCharts";
 import { VehicleForm } from "@/components/VehicleForm";
 import { VehicleSelector } from "@/components/VehicleSelector";
 
-type Modal = "vehicle" | "fill" | "data" | null;
+type Modal = "vehicle" | "fill" | "edit-fill" | "data" | null;
 
 export function CalculatorApp() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
@@ -26,6 +26,7 @@ export function CalculatorApp() {
   const [mobileNav, setMobileNav] = useState(false);
   const [notice, setNotice] = useState("");
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [editingFillId, setEditingFillId] = useState<string | null>(null);
   const datasetRef = useRef<Dataset | null>(null);
 
   useEffect(() => {
@@ -53,7 +54,13 @@ export function CalculatorApp() {
   const activeVehicle = dataset?.vehicles.find((vehicle) => vehicle.id === activeVehicleId)
     ?? dataset?.vehicles[0]
     ?? null;
+  const editingFill = activeVehicle?.fills.find((fill) => fill.id === editingFillId) ?? null;
   const roi = activeVehicle ? calculateVehicleRoi(activeVehicle) : null;
+
+  function closeModal() {
+    setModal(null);
+    setEditingFillId(null);
+  }
 
   function commitDataset(update: (current: Dataset) => Dataset): Dataset | null {
     const current = datasetRef.current;
@@ -110,11 +117,30 @@ export function CalculatorApp() {
     setNotice("Plein enregistré");
   }
 
+  function updateFill(values: FillFormValues, recordedDate?: string) {
+    if (!activeVehicle || !editingFillId || !recordedDate) return;
+    const vehicleId = activeVehicle.id;
+    const fillId = editingFillId;
+    if (!commitDataset((current) => ({
+      ...current,
+      vehicles: current.vehicles.map((vehicle) => vehicle.id === vehicleId
+        ? {
+          ...vehicle,
+          fills: vehicle.fills.map((fill) => fill.id === fillId
+            ? { ...fill, ...values, recordedAt: `${recordedDate}${fill.recordedAt.slice(10)}` }
+            : fill),
+        }
+        : vehicle),
+    }))) return;
+    closeModal();
+    setNotice("Plein modifié");
+  }
+
   function importDataset(imported: Dataset) {
     const next = commitDataset(() => imported);
     if (!next) return;
     setActiveVehicleId(next.vehicles[0]?.id ?? null);
-    setModal(null);
+    closeModal();
     setNotice("Données JSON importées");
   }
 
@@ -176,7 +202,12 @@ export function CalculatorApp() {
               </section>
               <DashboardSummary vehicle={activeVehicle} roi={roi} />
               <SavingsCharts fills={activeVehicle.fills} roi={roi} />
-              <section className="chart-grid lower history-grid"><FillHistory fills={activeVehicle.fills} /></section>
+              <section className="chart-grid lower history-grid">
+                <FillHistory
+                  fills={activeVehicle.fills}
+                  onEditFill={(fill) => { setEditingFillId(fill.id); setModal("edit-fill"); }}
+                />
+              </section>
             </>
           )}
         </div>
@@ -190,11 +221,12 @@ export function CalculatorApp() {
         <button onClick={() => setModal("vehicle")}><Icon name="plus" /><span>Ajouter</span></button>
       </nav>
 
-      {modal && <div className="modal-backdrop" onMouseDown={() => setModal(null)}>
+      {modal && <div className="modal-backdrop" onMouseDown={closeModal}>
         <div onMouseDown={(event) => event.stopPropagation()}>
-          {modal === "vehicle" && <VehicleForm onSubmit={addVehicle} onCancel={() => setModal(null)} />}
-          {modal === "fill" && activeVehicle && <FillForm installDate={activeVehicle.installDate} onSubmit={addFill} onCancel={() => setModal(null)} />}
-          {modal === "data" && <DataFileControls dataset={dataset} storageError={storageError} onImport={importDataset} onClose={() => setModal(null)} />}
+          {modal === "vehicle" && <VehicleForm onSubmit={addVehicle} onCancel={closeModal} />}
+          {modal === "fill" && activeVehicle && <FillForm installDate={activeVehicle.installDate} onSubmit={addFill} onCancel={closeModal} />}
+          {modal === "edit-fill" && activeVehicle && editingFill && <FillForm key={editingFill.id} installDate={activeVehicle.installDate} initialFill={editingFill} onSubmit={updateFill} onCancel={closeModal} />}
+          {modal === "data" && <DataFileControls dataset={dataset} storageError={storageError} onImport={importDataset} onClose={closeModal} />}
         </div>
       </div>}
 

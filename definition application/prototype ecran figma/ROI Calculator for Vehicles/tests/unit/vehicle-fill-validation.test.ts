@@ -39,4 +39,9 @@ describe("fill form validation", () => {
     expect(validateFillInput(validInput, "2026-10-19", recordedAt)).toBeNull();
     expect(validateFillInput(validInput, "2026-10-18", recordedAt)).toEqual(validInput);
   });
+
+  it("rejects fill dates in the future", () => {
+    const future = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+    expect(validateFillInput(validInput, "2026-10-18", future)).toBeNull();
+  });
 });

@@ -32,6 +32,7 @@ export function validateFillInput(
     || !isCalendarDate(installDate)
     || !Number.isFinite(recordedAt.getTime())
     || recordedAt.toISOString().slice(0, 10) < installDate
+    || recordedAt.toISOString().slice(0, 10) > new Date().toISOString().slice(0, 10)
   ) {
     return null;
   }
