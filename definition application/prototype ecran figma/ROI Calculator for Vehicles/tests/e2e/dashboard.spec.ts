@@ -34,6 +34,7 @@ test("shows the actual ROI values, charts, negative remaining balance, and empty
   await expect(page.getByText("-4,00 €").first()).toBeVisible();
   await expect(page.getByRole("img", { name: "Courbe des économies nettes cumulées" })).toBeVisible();
   await expect(page.getByRole("img", { name: "Répartition de l'amortissement" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Évolution du coût total des pleins E85 et SP95" })).toBeVisible();
   const comparisonChart = page.getByRole("img", { name: "Comparaison du coût E85 et du coût SP95 équivalent" });
   await expect(comparisonChart).toBeVisible();
   const chartBounds = await comparisonChart.boundingBox();
@@ -49,4 +50,5 @@ test("shows the actual ROI values, charts, negative remaining balance, and empty
   await page.getByRole("button", { name: "Enregistrer le véhicule" }).click();
   await expect(page.getByText("Aucun plein enregistré pour ce véhicule.")).toBeVisible();
   await expect(page.getByText("La courbe apparaîtra après votre premier plein.")).toBeVisible();
+  await expect(page.getByText("Le graphique des dépenses apparaîtra après votre premier plein.")).toBeVisible();
 });

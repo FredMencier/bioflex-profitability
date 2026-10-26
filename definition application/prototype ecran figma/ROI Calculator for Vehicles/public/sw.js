@@ -1,5 +1,14 @@
-const CACHE_NAME = "bioflex-roi-v2";
-const APP_SHELL = ["./", "./manifest.webmanifest", "./app-icon.svg"];
+const CACHE_NAME = "bioflex-roi-v3";
+const APP_SHELL = [
+  "./",
+  "./manifest.webmanifest",
+  "./app-icon.svg",
+  "./app-icon-maskable.svg",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./app-icon-maskable-512.png",
+  "./apple-touch-icon.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

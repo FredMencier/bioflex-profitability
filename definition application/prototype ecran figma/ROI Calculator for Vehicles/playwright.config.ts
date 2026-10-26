@@ -15,9 +15,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev --hostname 127.0.0.1 --port 3100",
+    command: "PLAYWRIGHT_TEST=true pnpm dev --hostname 127.0.0.1 --port 3100",
     url: "http://127.0.0.1:3100/bioflex-profitability/",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

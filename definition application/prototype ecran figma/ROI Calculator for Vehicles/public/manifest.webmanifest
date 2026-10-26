@@ -2,6 +2,7 @@
   "name": "Bioflex ROI",
   "short_name": "Bioflex ROI",
   "description": "Suivez les économies et l'amortissement de vos boîtiers Bioflex E85.",
+  "id": "/bioflex-profitability/",
   "lang": "fr",
   "start_url": "/bioflex-profitability/",
   "scope": "/bioflex-profitability/",
@@ -11,10 +12,28 @@
   "theme_color": "#278c67",
   "icons": [
     {
+      "src": "/bioflex-profitability/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bioflex-profitability/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/bioflex-profitability/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/bioflex-profitability/app-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

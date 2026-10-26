@@ -121,6 +121,46 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
     ],
   };
 
+  const costTrendOption: EChartsOption = {
+    animation: false,
+    color: [green, orange],
+    grid: { left: 58, right: 16, top: 35, bottom: 35 },
+    legend: { top: 0, right: 8, textStyle: { color: "#7f8985" } },
+    tooltip: { trigger: "axis", valueFormatter: (value) => money(Number(value)) },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: chronological.map((fill) => dateLabel(fill.recordedAt)),
+      axisLine: { lineStyle: { color: gridLine } },
+      axisLabel: { color: "#9da6a2", hideOverlap: true },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#9da6a2", formatter: (value: number) => `${Math.round(value)} €` },
+      splitLine: { lineStyle: { color: gridLine, type: "dashed" } },
+    },
+    series: [
+      {
+        name: "E85 payé",
+        type: "line",
+        data: chronological.map((fill) => calculateFillCosts(fill).e85CostEur),
+        showSymbol: true,
+        symbolSize: 7,
+        lineStyle: { color: green, width: 2.5 },
+        itemStyle: { color: green },
+      },
+      {
+        name: "SP95 équivalent",
+        type: "line",
+        data: chronological.map((fill) => calculateFillCosts(fill).sp95EquivalentCostEur),
+        showSymbol: true,
+        symbolSize: 7,
+        lineStyle: { color: orange, width: 2.5 },
+        itemStyle: { color: orange },
+      },
+    ],
+  };
+
   const amortizationOption: EChartsOption = {
     animation: false,
     tooltip: { trigger: "item", formatter: "{b}: {c} € ({d}%)" },
@@ -161,6 +201,10 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
         <article className="panel comparison">
           <div className="panel-head"><div><h3>Coût des pleins</h3><p>Cliquez sur une barre pour voir les prix au litre · SP95 ajusté de 20 %</p></div></div>
           {fills.length ? <Chart option={comparisonOption} label="Comparaison du coût E85 et du coût SP95 équivalent" className="echart echart-bars" /> : <div className="empty-chart">Aucune donnée à comparer.</div>}
+        </article>
+        <article className="panel cost-trend">
+          <div className="panel-head"><div><h3>Coût total dans le temps</h3><p>Dépense par plein en E85 et en SP95 équivalent</p></div></div>
+          {fills.length ? <Chart option={costTrendOption} label="Évolution du coût total des pleins E85 et SP95" className="echart echart-cost-trend" /> : <div className="empty-chart">Le graphique des dépenses apparaîtra après votre premier plein.</div>}
         </article>
       </section>
     </>
