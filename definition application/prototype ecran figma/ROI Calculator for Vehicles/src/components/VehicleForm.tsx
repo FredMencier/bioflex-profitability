@@ -14,10 +14,12 @@ export function VehicleForm({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const extraCost = form.get("boxCostExtraEur");
     const vehicle = validateVehicleInput({
       make: String(form.get("make") ?? ""),
       model: String(form.get("model") ?? ""),
       boxCostEur: Number(form.get("boxCostEur")),
+      boxCostExtraEur: extraCost === null || extraCost === "" ? undefined : Number(extraCost),
       installDate: String(form.get("installDate") ?? ""),
     });
     if (!vehicle) {
@@ -42,6 +44,7 @@ export function VehicleForm({
           <label>Coût du boîtier (€)<input name="boxCostEur" type="number" min="0.01" step="0.01" defaultValue="1000" required /></label>
           <label>Date d'installation<input name="installDate" type="date" max={today} defaultValue={today} required /></label>
         </div>
+        <label>Montant supplémentaire lié à la pose (€)<input name="boxCostExtraEur" type="number" min="0" step="0.01" placeholder="0" /></label>
         <p className="form-hint">Le coût proposé est de 1 000 €. Vous pouvez le modifier selon votre facture.</p>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="modal-actions">
