@@ -13,6 +13,7 @@ export type Vehicle = {
   make: string;
   model: string;
   boxCostEur: number;
+  boxCostExtraEur?: number;
   installDate: string;
   createdAt: string;
   fills: Fill[];
@@ -63,7 +64,7 @@ export function validateDataset(value: unknown): DatasetValidationResult {
         errors.push(`${vehiclePath} must be an object.`);
         return;
       }
-      if (!hasOnlyKeys(candidate, ["id", "make", "model", "boxCostEur", "installDate", "createdAt", "fills"])) {
+      if (!hasOnlyKeys(candidate, ["id", "make", "model", "boxCostEur", "boxCostExtraEur", "installDate", "createdAt", "fills"])) {
         errors.push(`${vehiclePath} contains unsupported fields.`);
       }
 
@@ -71,6 +72,13 @@ export function validateDataset(value: unknown): DatasetValidationResult {
       const make = readRequiredString(candidate.make, `${vehiclePath}.make`, errors);
       const model = readRequiredString(candidate.model, `${vehiclePath}.model`, errors);
       const boxCostEur = readPositiveNumber(candidate.boxCostEur, `${vehiclePath}.boxCostEur`, errors);
+      let boxCostExtraEur: number | undefined = undefined;
+      if (candidate.boxCostExtraEur !== undefined && candidate.boxCostExtraEur !== null) {
+        const extra = readNonNegativeNumber(candidate.boxCostExtraEur, `${vehiclePath}.boxCostExtraEur`, errors);
+        if (extra !== null) {
+          boxCostExtraEur = extra;
+        }
+      }
       const installDate = candidate.installDate;
       if (!isCalendarDate(installDate)) errors.push(`${vehiclePath}.installDate must be a valid YYYY-MM-DD date.`);
       const createdAt = candidate.createdAt;
@@ -115,6 +123,7 @@ export function validateDataset(value: unknown): DatasetValidationResult {
           make,
           model,
           boxCostEur,
+          ...(boxCostExtraEur !== undefined ? { boxCostExtraEur } : {}),
           installDate,
           createdAt,
           fills,
@@ -167,6 +176,14 @@ function readRequiredString(value: unknown, path: string, errors: string[]): str
 function readPositiveNumber(value: unknown, path: string, errors: string[]): number | null {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     errors.push(`${path} must be a finite positive number.`);
+    return null;
+  }
+  return value;
+}
+
+function readNonNegativeNumber(value: unknown, path: string, errors: string[]): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    errors.push(`${path} must be a finite non-negative number.`);
     return null;
   }
   return value;

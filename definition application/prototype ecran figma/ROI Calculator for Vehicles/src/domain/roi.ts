@@ -10,6 +10,7 @@ export type FillCosts = {
 
 export type VehicleRoi = {
   boxCostEur: number;
+  boxCostExtraEur: number;
   e85TotalCostEur: number;
   sp95EquivalentTotalCostEur: number;
   totalSavingsEur: number;
@@ -38,19 +39,20 @@ export function calculateFillCosts(fill: Fill): FillCosts {
   };
 }
 
-export function calculateVehicleRoi(vehicle: Pick<Vehicle, "boxCostEur" | "fills">): VehicleRoi {
+export function calculateVehicleRoi(vehicle: Pick<Vehicle, "boxCostEur" | "boxCostExtraEur" | "fills">): VehicleRoi {
   const fillCosts = vehicle.fills.map(calculateFillCosts);
   const e85TotalCostEur = roundCurrency(fillCosts.reduce((sum, costs) => sum + costs.e85CostEur, 0));
   const sp95EquivalentTotalCostEur = roundCurrency(
     fillCosts.reduce((sum, costs) => sum + costs.sp95EquivalentCostEur, 0),
   );
   const totalSavingsEur = roundCurrency(fillCosts.reduce((sum, costs) => sum + costs.savingEur, 0));
-  const remainingToAmortizeEur = roundCurrency(roundCurrency(vehicle.boxCostEur) - totalSavingsEur);
+  const totalCostEur = roundCurrency(roundCurrency(vehicle.boxCostEur) + roundCurrency(vehicle.boxCostExtraEur ?? 0));
+  const remainingToAmortizeEur = roundCurrency(totalCostEur - totalSavingsEur);
   const averageSavingsPerFillEur = vehicle.fills.length > 0
     ? roundCurrency(totalSavingsEur / vehicle.fills.length)
     : 0;
-  const amortizationPercentage = vehicle.boxCostEur > 0
-    ? totalSavingsEur / vehicle.boxCostEur * 100
+  const amortizationPercentage = totalCostEur > 0
+    ? totalSavingsEur / totalCostEur * 100
     : 0;
   const fillsUntilAmortized = remainingToAmortizeEur <= 0
     ? 0
@@ -60,6 +62,7 @@ export function calculateVehicleRoi(vehicle: Pick<Vehicle, "boxCostEur" | "fills
 
   return {
     boxCostEur: roundCurrency(vehicle.boxCostEur),
+    boxCostExtraEur: roundCurrency(vehicle.boxCostExtraEur ?? 0),
     e85TotalCostEur,
     sp95EquivalentTotalCostEur,
     totalSavingsEur,
