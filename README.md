@@ -38,3 +38,8 @@ pnpm build
 ```
 
 Next.js génère le site statique dans `out/`. Ce dossier est destiné à GitHub Pages et doit être publié sous `/bioflex-profitability/`; il ne contient pas de serveur d'application.
+
+## URL de l'app
+
+https://fredmencier.github.io/bioflex-profitability/
+
