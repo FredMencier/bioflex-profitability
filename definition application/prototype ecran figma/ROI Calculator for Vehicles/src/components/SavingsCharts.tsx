@@ -39,9 +39,10 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
     runningSavings += calculateFillCosts(fill).savingEur;
     return roundChartValue(runningSavings);
   });
-  const recent = chronological.slice(-8);
+  const recent = chronological.slice(-10);
   const progress = Math.max(0, Math.min(roi.amortizationPercentage, 100));
-  const paidOff = Math.max(0, Math.min(roi.totalSavingsEur, roi.boxCostEur));
+  const totalCostEur = roundCurrency(roi.boxCostEur + (roi.boxCostExtraEur ?? 0));
+  const paidOff = Math.max(0, Math.min(roi.totalSavingsEur, totalCostEur));
   const outstanding = Math.max(roi.remainingToAmortizeEur, 0);
 
   const cumulativeOption: EChartsOption = {

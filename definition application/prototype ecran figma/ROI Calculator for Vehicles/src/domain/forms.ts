@@ -2,6 +2,7 @@ export type VehicleFormValues = {
   make: string;
   model: string;
   boxCostEur: number;
+  boxCostExtraEur?: number;
   installDate: string;
 };
 
@@ -25,6 +26,11 @@ export function validateVehicleInput(
     || (latestInstallDate !== undefined && input.installDate > latestInstallDate)
   ) {
     return null;
+  }
+  if (input.boxCostExtraEur !== undefined && input.boxCostExtraEur !== null) {
+    if (!Number.isFinite(input.boxCostExtraEur) || input.boxCostExtraEur < 0) {
+      return null;
+    }
   }
   return { ...input, make, model };
 }

@@ -90,6 +90,7 @@ export function CalculatorApp() {
       make: values.make,
       model: values.model,
       boxCostEur: values.boxCostEur,
+      ...(values.boxCostExtraEur !== undefined && values.boxCostExtraEur !== null ? { boxCostExtraEur: values.boxCostExtraEur } : {}),
       installDate: values.installDate,
       createdAt: now.toISOString(),
       fills: [],

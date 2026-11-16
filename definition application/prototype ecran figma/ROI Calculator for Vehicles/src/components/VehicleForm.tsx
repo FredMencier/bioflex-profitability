@@ -26,10 +26,12 @@ export function VehicleForm({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const extraCost = form.get("boxCostExtraEur");
     const vehicle = validateVehicleInput({
       make: String(form.get("make") ?? ""),
       model: String(form.get("model") ?? ""),
       boxCostEur: Number(form.get("boxCostEur")),
+      boxCostExtraEur: extraCost === null || extraCost === "" ? undefined : Number(extraCost),
       installDate: String(form.get("installDate") ?? ""),
     }, latestInstallDate);
     if (!vehicle) {
@@ -58,6 +60,8 @@ export function VehicleForm({
           <label>Date d'installation<input name="installDate" type="date" max={latestInstallDate} defaultValue={initialVehicle?.installDate ?? today} required /></label>
         </div>
         <p className="form-hint">{initialVehicle ? "La date d'installation doit rester antérieure aux pleins déjà enregistrés." : "Le coût proposé est de 1 000 €. Vous pouvez le modifier selon votre facture."}</p>
+        <label>Montant supplémentaire lié à la pose (€)<input name="boxCostExtraEur" type="number" min="0" step="0.01" placeholder="0" /></label>
+        <p className="form-hint">Le coût proposé est de 1 000 €. Vous pouvez le modifier selon votre facture.</p>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="modal-actions">
           <button className="btn btn-ghost" type="button" onClick={onCancel}>Annuler</button>
