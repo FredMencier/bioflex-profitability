@@ -11,10 +11,19 @@ export type FillFormValues = {
   litres: number;
 };
 
-export function validateVehicleInput(input: VehicleFormValues): VehicleFormValues | null {
+export function validateVehicleInput(
+  input: VehicleFormValues,
+  latestInstallDate?: string,
+): VehicleFormValues | null {
   const make = input.make.trim();
   const model = input.model.trim();
-  if (!make || !model || !isFinitePositive(input.boxCostEur) || !isCalendarDate(input.installDate)) {
+  if (
+    !make
+    || !model
+    || !isFinitePositive(input.boxCostEur)
+    || !isCalendarDate(input.installDate)
+    || (latestInstallDate !== undefined && input.installDate > latestInstallDate)
+  ) {
     return null;
   }
   return { ...input, make, model };
