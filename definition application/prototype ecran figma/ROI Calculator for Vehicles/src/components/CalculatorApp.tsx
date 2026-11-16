@@ -16,7 +16,7 @@ import { SavingsCharts } from "@/components/SavingsCharts";
 import { VehicleForm } from "@/components/VehicleForm";
 import { VehicleSelector } from "@/components/VehicleSelector";
 
-type Modal = "vehicle" | "fill" | "edit-fill" | "data" | null;
+type Modal = "vehicle" | "edit-vehicle" | "fill" | "edit-fill" | "data" | null;
 
 export function CalculatorApp() {
   const [dataset, setDataset] = useState<Dataset | null>(null);
@@ -101,6 +101,19 @@ export function CalculatorApp() {
     setNotice("Véhicule enregistré");
   }
 
+  function updateVehicle(values: VehicleFormValues) {
+    if (!activeVehicle) return;
+    const vehicleId = activeVehicle.id;
+    if (!commitDataset((current) => ({
+      ...current,
+      vehicles: current.vehicles.map((vehicle) => vehicle.id === vehicleId
+        ? { ...vehicle, ...values }
+        : vehicle),
+    }))) return;
+    closeModal();
+    setNotice("Véhicule modifié");
+  }
+
   function addFill(values: FillFormValues) {
     if (!activeVehicle) return;
     const fill: Fill = {
@@ -179,6 +192,7 @@ export function CalculatorApp() {
           <div><p>Tableau de bord</p><h1>{title}</h1></div>
           <div className="top-actions">
             {activeVehicle && <div className="install-pill"><Icon name="calendar" size={17} /><span>Installé le {dateLabel(activeVehicle.installDate)}</span></div>}
+            {activeVehicle && <button className="btn btn-secondary" aria-label="Modifier les informations du véhicule" onClick={() => setModal("edit-vehicle")}><Icon name="edit" size={17} /> Modifier</button>}
             {activeVehicle && <button className="btn btn-primary" onClick={() => setModal("fill")}><Icon name="plus" size={18} /> Ajouter un plein</button>}
             <button className="data-top-button" onClick={() => setModal("data")} aria-label="Ouvrir la gestion des données"><Icon name="database" /></button>
           </div>
@@ -225,6 +239,7 @@ export function CalculatorApp() {
       {modal && <div className="modal-backdrop" onMouseDown={closeModal}>
         <div onMouseDown={(event) => event.stopPropagation()}>
           {modal === "vehicle" && <VehicleForm onSubmit={addVehicle} onCancel={closeModal} />}
+          {modal === "edit-vehicle" && activeVehicle && <VehicleForm key={activeVehicle.id} initialVehicle={activeVehicle} onSubmit={updateVehicle} onCancel={closeModal} />}
           {modal === "fill" && activeVehicle && <FillForm installDate={activeVehicle.installDate} onSubmit={addFill} onCancel={closeModal} />}
           {modal === "edit-fill" && activeVehicle && editingFill && <FillForm key={editingFill.id} installDate={activeVehicle.installDate} initialFill={editingFill} onSubmit={updateFill} onCancel={closeModal} />}
           {modal === "data" && <DataFileControls dataset={dataset} storageError={storageError} onImport={importDataset} onClose={closeModal} />}

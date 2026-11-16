@@ -33,3 +33,32 @@ test("keeps fills and amortization isolated per selected vehicle", async ({ page
   await expect(page.getByText("0 pleins enregistrés")).toBeVisible();
   await expect(page.getByText("Aucun plein enregistré pour ce véhicule.")).toBeVisible();
 });
+
+test("edits vehicle details without losing its fill history", async ({ page }) => {
+  await page.goto("./");
+  await addVehicle(page, "Peugeot", "308");
+  await addFill(page);
+
+  await page.getByRole("button", { name: "Modifier les informations du véhicule" }).click();
+  const dialog = page.getByRole("dialog", { name: "Modifier un véhicule" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel("Marque")).toHaveValue("Peugeot");
+  await expect(dialog.getByLabel("Modèle")).toHaveValue("308");
+  await expect(dialog.getByLabel("Coût du boîtier (€)")).toHaveValue("1000");
+
+  await dialog.getByLabel("Marque").fill("Citroën");
+  await dialog.getByLabel("Modèle").fill("C3");
+  await dialog.getByLabel("Coût du boîtier (€)").fill("1500");
+  await dialog.getByRole("button", { name: "Enregistrer les modifications" }).click();
+
+  await expect(page.getByRole("heading", { name: "Citroën C3" })).toBeVisible();
+  await expect(page.getByText("1 plein enregistré")).toBeVisible();
+  await expect(page.getByText("Véhicule modifié")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Citroën C3" })).toBeVisible();
+  await expect(page.getByText("1 plein enregistré")).toBeVisible();
+  await page.getByRole("button", { name: /Citroën C3/ }).click();
+  await page.getByRole("button", { name: "Modifier les informations du véhicule" }).click();
+  await expect(page.getByLabel("Coût du boîtier (€)")).toHaveValue("1500");
+});
