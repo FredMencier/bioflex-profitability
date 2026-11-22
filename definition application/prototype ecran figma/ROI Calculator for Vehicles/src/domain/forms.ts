@@ -10,6 +10,7 @@ export type FillFormValues = {
   e85PricePerLitreEur: number;
   sp95PricePerLitreEur: number;
   litres: number;
+  byThirdParty: boolean;
 };
 
 export function validateVehicleInput(
@@ -51,7 +52,7 @@ export function validateFillInput(
   ) {
     return null;
   }
-  return input;
+  return { ...input, byThirdParty: !!input.byThirdParty };
 }
 
 function isFinitePositive(value: number): boolean {

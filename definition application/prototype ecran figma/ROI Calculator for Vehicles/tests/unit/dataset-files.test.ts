@@ -20,6 +20,7 @@ const dataset: Dataset = {
           e85PricePerLitreEur: 0.9,
           sp95PricePerLitreEur: 1.8,
           litres: 40,
+          byThirdParty: false,
         },
       ],
     },

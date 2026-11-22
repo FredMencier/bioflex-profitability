@@ -1,5 +1,6 @@
 import type { Fill } from "@/domain/dataset";
 import { calculateFillCosts } from "@/domain/roi";
+import { Icon } from "@/components/Icon";
 
 function money(value: number): string {
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
@@ -18,16 +19,17 @@ export function FillHistory({ fills, onEditFill }: { fills: Fill[]; onEditFill: 
           const date = new Date(Date.UTC(year, month - 1, day));
           return (
             <button
-              className="fill-row fill-row-button"
+              className={`fill-row fill-row-button${fill.byThirdParty ? " third-party" : ""}`}
               key={fill.id}
               type="button"
-              aria-label={`Modifier le plein enregistré le ${fill.recordedAt.slice(0, 10)}`}
+              aria-label={`Modifier le plein enregistré le ${fill.recordedAt.slice(0, 10)}${fill.byThirdParty ? " (tiers)" : ""}`}
               onClick={() => onEditFill(fill)}
             >
               <div className="date-box"><strong>{date.getUTCDate()}</strong><small>{new Intl.DateTimeFormat("fr-FR", { month: "short", timeZone: "UTC" }).format(date).replace(".", "")}</small></div>
               <div className="fill-info">
                 <strong>{fill.litres.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} L d'E85</strong>
                 <small>E85 payé {money(costs.e85CostEur)} · SP95 équivalent {money(costs.sp95EquivalentCostEur)}</small>
+                {fill.byThirdParty && <span className="third-party-badge"><Icon name="user" size={12} /> Tiers</span>}
               </div>
               <div className={`saving ${costs.savingEur < 0 ? "negative" : ""}`}>
                 <small>ÉCONOMIE</small><strong>{money(costs.savingEur)}</strong>

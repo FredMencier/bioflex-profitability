@@ -72,3 +72,12 @@ export function calculateVehicleRoi(vehicle: Pick<Vehicle, "boxCostEur" | "boxCo
     fillsUntilAmortized,
   };
 }
+
+export function calculateVehicleRoiExcludingThirdParty(vehicle: Pick<Vehicle, "boxCostEur" | "boxCostExtraEur" | "fills">): VehicleRoi {
+  const ownFills = vehicle.fills.filter((fill) => !fill.byThirdParty);
+  return calculateVehicleRoi({
+    boxCostEur: vehicle.boxCostEur,
+    boxCostExtraEur: vehicle.boxCostExtraEur,
+    fills: ownFills,
+  });
+}

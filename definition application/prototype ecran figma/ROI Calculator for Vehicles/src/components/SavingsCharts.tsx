@@ -8,7 +8,7 @@ import type { EChartsType, EChartsOption } from "echarts";
 import { CanvasRenderer } from "echarts/renderers";
 import type { Fill } from "@/domain/dataset";
 import type { VehicleRoi } from "@/domain/roi";
-import { calculateFillCosts, roundCurrency } from "@/domain/roi";
+import { calculateFillCosts, calculateVehicleRoiExcludingThirdParty, roundCurrency } from "@/domain/roi";
 
 echarts.use([BarChart, LineChart, PieChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer]);
 
@@ -29,7 +29,7 @@ function dateLabel(value: string): string {
     .format(new Date(value));
 }
 
-export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }) {
+export function SavingsCharts({ fills, roi, vehicle }: { fills: Fill[]; roi: VehicleRoi; vehicle: { boxCostEur: number; boxCostExtraEur?: number } }) {
   const chronological = useMemo(
     () => [...fills].sort((a, b) => a.recordedAt.localeCompare(b.recordedAt)),
     [fills],
@@ -44,6 +44,16 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
   const totalCostEur = roundCurrency(roi.boxCostEur + (roi.boxCostExtraEur ?? 0));
   const paidOff = Math.max(0, Math.min(roi.totalSavingsEur, totalCostEur));
   const outstanding = Math.max(roi.remainingToAmortizeEur, 0);
+
+  // Calculate ROI excluding third-party fills
+  const roiExcludingThirdParty = calculateVehicleRoiExcludingThirdParty({
+    boxCostEur: vehicle.boxCostEur,
+    boxCostExtraEur: vehicle.boxCostExtraEur,
+    fills,
+  });
+  const progressExcludingThirdParty = Math.max(0, Math.min(roiExcludingThirdParty.amortizationPercentage, 100));
+  const paidOffExcludingThirdParty = Math.max(0, Math.min(roiExcludingThirdParty.totalSavingsEur, totalCostEur));
+  const outstandingExcludingThirdParty = Math.max(roiExcludingThirdParty.remainingToAmortizeEur, 0);
 
   const cumulativeOption: EChartsOption = {
     animation: false,
@@ -178,6 +188,22 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
     }],
   };
 
+  const amortizationExcludingThirdPartyOption: EChartsOption = {
+    animation: false,
+    tooltip: { trigger: "item", formatter: "{b}: {c} € ({d}%)" },
+    series: [{
+      type: "pie",
+      radius: ["66%", "86%"],
+      avoidLabelOverlap: true,
+      label: { show: false },
+      itemStyle: { borderColor: "#fff", borderWidth: 4 },
+      data: [
+        { name: "Économisé", value: paidOffExcludingThirdParty, itemStyle: { color: green } },
+        { name: "Reste à amortir", value: outstandingExcludingThirdParty, itemStyle: { color: "#e4ebe7" } },
+      ],
+    }],
+  };
+
   return (
     <>
       <section className="chart-grid">
@@ -186,7 +212,7 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
           {fills.length ? <Chart option={cumulativeOption} label="Courbe des économies nettes cumulées" className="chart-wrap echart" /> : <div className="empty-chart">La courbe apparaîtra après votre premier plein.</div>}
         </article>
         <article className="panel amortization">
-          <div className="panel-head"><div><h3>Amortissement</h3><p>État du coût du boîtier</p></div></div>
+          <div className="panel-head"><div><h3>Amortissement (tous les pleins)</h3><p>État du coût du boîtier</p></div></div>
           <div className="echart-donut">
             <Chart option={amortizationOption} label="Répartition de l'amortissement" className="echart echart-pie" />
             <div className="echart-center"><strong>{Math.round(progress)}%</strong><span>amorti</span></div>
@@ -196,6 +222,18 @@ export function SavingsCharts({ fills, roi }: { fills: Fill[]; roi: VehicleRoi }
             <div><i className="dot pale-dot" /><span>Reste<strong>{money(roi.remainingToAmortizeEur)}</strong></span></div>
           </div>
           <div className="forecast"><span className="forecast-icon">↗</span><span><strong>{roi.fillsUntilAmortized === null ? "Ajoutez des pleins pour estimer" : roi.fillsUntilAmortized === 0 ? "Boîtier amorti" : `Environ ${roi.fillsUntilAmortized} pleins restants`}</strong><small>Estimation basée sur vos économies moyennes</small></span></div>
+        </article>
+        <article className="panel amortization">
+          <div className="panel-head"><div><h3>Amortissement (hors tiers)</h3><p>État du coût du boîtier sans les pleins faits par un tiers</p></div></div>
+          <div className="echart-donut">
+            <Chart option={amortizationExcludingThirdPartyOption} label="Répartition de l'amortissement hors tiers" className="echart echart-pie" />
+            <div className="echart-center"><strong>{Math.round(progressExcludingThirdParty)}%</strong><span>amorti</span></div>
+          </div>
+          <div className="donut-legend">
+            <div><i className="dot green-dot" /><span>Économisé<strong>{money(roiExcludingThirdParty.totalSavingsEur)}</strong></span></div>
+            <div><i className="dot pale-dot" /><span>Reste<strong>{money(roiExcludingThirdParty.remainingToAmortizeEur)}</strong></span></div>
+          </div>
+          <div className="forecast"><span className="forecast-icon">↗</span><span><strong>{roiExcludingThirdParty.fillsUntilAmortized === null ? "Ajoutez des pleins pour estimer" : roiExcludingThirdParty.fillsUntilAmortized === 0 ? "Boîtier amorti" : `Environ ${roiExcludingThirdParty.fillsUntilAmortized} pleins restants`}</strong><small>Estimation basée sur vos économies moyennes (hors tiers)</small></span></div>
         </article>
       </section>
       <section className="chart-grid lower">

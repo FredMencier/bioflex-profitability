@@ -6,6 +6,7 @@ export type Fill = {
   e85PricePerLitreEur: number;
   sp95PricePerLitreEur: number;
   litres: number;
+  byThirdParty: boolean;
 };
 
 export type Vehicle = {
@@ -93,9 +94,9 @@ export function validateDataset(value: unknown): DatasetValidationResult {
             errors.push(`${fillPath} must be an object.`);
             return;
           }
-          if (!hasOnlyKeys(fillCandidate, ["id", "recordedAt", "e85PricePerLitreEur", "sp95PricePerLitreEur", "litres"])) {
-            errors.push(`${fillPath} contains unsupported fields.`);
-          }
+if (!hasOnlyKeys(fillCandidate, ["id", "recordedAt", "e85PricePerLitreEur", "sp95PricePerLitreEur", "litres", "byThirdParty"])) {
+        errors.push(`${fillPath} contains unsupported fields.`);
+      }
 
           const fillId = readId(fillCandidate.id, `${fillPath}.id`, ids, errors);
           const recordedAt = fillCandidate.recordedAt;
@@ -106,9 +107,10 @@ export function validateDataset(value: unknown): DatasetValidationResult {
           const e85PricePerLitreEur = readPositiveNumber(fillCandidate.e85PricePerLitreEur, `${fillPath}.e85PricePerLitreEur`, errors);
           const sp95PricePerLitreEur = readPositiveNumber(fillCandidate.sp95PricePerLitreEur, `${fillPath}.sp95PricePerLitreEur`, errors);
           const litres = readPositiveNumber(fillCandidate.litres, `${fillPath}.litres`, errors);
+          const byThirdParty = typeof fillCandidate.byThirdParty === "boolean" ? fillCandidate.byThirdParty : false;
 
           if (fillId && isUtcDateTime(recordedAt) && e85PricePerLitreEur !== null && sp95PricePerLitreEur !== null && litres !== null) {
-            fills.push({ id: fillId, recordedAt, e85PricePerLitreEur, sp95PricePerLitreEur, litres });
+            fills.push({ id: fillId, recordedAt, e85PricePerLitreEur, sp95PricePerLitreEur, litres, byThirdParty });
           }
         });
       }

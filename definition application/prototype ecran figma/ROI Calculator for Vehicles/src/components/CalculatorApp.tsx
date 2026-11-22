@@ -216,7 +216,7 @@ export function CalculatorApp() {
                 <div className="vehicle-summary"><span className="vehicle-icon large"><Icon name="car" size={23} /></span><div><small>VÉHICULE ACTIF</small><strong>{title}</strong><p>{activeVehicle.fills.length} plein{activeVehicle.fills.length === 1 ? "" : "s"} enregistré{activeVehicle.fills.length === 1 ? "" : "s"}</p></div></div>
               </section>
               <DashboardSummary vehicle={activeVehicle} roi={roi} />
-              <SavingsCharts fills={activeVehicle.fills} roi={roi} />
+              <SavingsCharts fills={activeVehicle.fills} roi={roi} vehicle={{ boxCostEur: activeVehicle.boxCostEur, boxCostExtraEur: activeVehicle.boxCostExtraEur }} />
               <section className="chart-grid lower history-grid">
                 <FillHistory
                   fills={activeVehicle.fills}

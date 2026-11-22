@@ -18,6 +18,7 @@ const dataset = {
           e85PricePerLitreEur: 1,
           sp95PricePerLitreEur: 3,
           litres: 10,
+          byThirdParty: false,
         },
       ],
     },
@@ -33,7 +34,7 @@ test("shows the actual ROI values, charts, negative remaining balance, and empty
   await expect(page.getByText("14,00 €").first()).toBeVisible();
   await expect(page.getByText("-4,00 €").first()).toBeVisible();
   await expect(page.getByRole("img", { name: "Courbe des économies nettes cumulées" })).toBeVisible();
-  await expect(page.getByRole("img", { name: "Répartition de l'amortissement" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Répartition de l'amortissement", exact: true })).toBeVisible();
   await expect(page.getByRole("img", { name: "Évolution du coût total des pleins E85 et SP95" })).toBeVisible();
   const comparisonChart = page.getByRole("img", { name: "Comparaison du coût E85 et du coût SP95 équivalent" });
   await expect(comparisonChart).toBeVisible();
@@ -42,7 +43,7 @@ test("shows the actual ROI values, charts, negative remaining balance, and empty
   await comparisonChart.click({ position: { x: chartBounds!.width / 2 + 8, y: 170 } });
   await expect(page.getByText(/E85 payé.*1,00.*\/L/)).toBeVisible();
   await expect(page.getByText(/SP95 équivalent.*3,00.*\/L/)).toBeVisible();
-  await expect(page.getByText("Boîtier amorti")).toBeVisible();
+  await expect(page.getByText("Boîtier amorti").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Ajouter un véhicule" }).first().click();
   await page.getByLabel("Marque").fill("Citroën");

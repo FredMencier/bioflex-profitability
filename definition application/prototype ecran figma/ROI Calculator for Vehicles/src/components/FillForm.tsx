@@ -27,6 +27,7 @@ export function FillForm({
       e85PricePerLitreEur: Number(form.get("e85PricePerLitreEur")),
       sp95PricePerLitreEur: Number(form.get("sp95PricePerLitreEur")),
       litres: Number(form.get("litres")),
+      byThirdParty: form.get("byThirdParty") === "on",
     }, installDate, recordedAt);
     if (!fill) {
       setError("Saisissez des prix et un volume supérieurs à 0. La date doit être comprise entre l'installation et aujourd'hui.");
@@ -51,6 +52,10 @@ export function FillForm({
         </div>
         <label>Volume du plein (litres)<input name="litres" type="number" min="0.1" step="0.1" placeholder="45,5" defaultValue={initialFill?.litres} required /></label>
         {initialFill && <label>Date du plein<input name="recordedDate" type="date" min={installDate} max={new Date().toISOString().slice(0, 10)} defaultValue={initialFill.recordedAt.slice(0, 10)} required /></label>}
+        <label className="checkbox-label">
+          <input type="checkbox" name="byThirdParty" defaultChecked={initialFill?.byThirdParty ?? false} />
+          <span>Fait par un tiers</span>
+        </label>
         <div className="formula-note"><Icon name="leaf" size={19} /><span>Le coût SP95 équivalent tient compte d'une surconsommation E85 estimée à 20 %. {initialFill ? "L'heure d'origine du plein est conservée." : "La date du plein est enregistrée automatiquement."}</span></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="modal-actions">
